@@ -1,0 +1,58 @@
+{
+  "extends": "@tsconfig/node16",
+  "include": [
+    "src",
+    "typings",
+    "test",
+    "./node_modules/@internal/component-test-library/**/*.d.ts"
+  ],
+  "compilerOptions": {
+    "declaration": true,
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "outDir": "./build",
+    "baseUrl": "./",
+    "noUnusedLocals": true,
+    "strictPropertyInitialization": false,
+    "paths": {
+      "@domains": [
+        "./src/domains"
+      ],
+      "@domains/*": [
+        "./src/domains/*"
+      ],
+      "@infra": [
+        "./src/infrastructure"
+      ],
+      "@infra/*": [
+        "./src/infrastructure/*"
+      ],
+      "@core": [
+        "./src/core"
+      ],
+      "@core/*": [
+        "./src/core/*"
+      ],
+      "@typings/*": [
+        "./typings/*"
+      ],
+      "@test/*": [
+        "./test/*"
+      ],
+      "@test-component/*": [
+        "./test/component/*"
+      ],
+      "@utils": [
+        "./src/utils"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@api/*": [
+        "./src/api/*"
+      ]
+    }
+  }
+}

@@ -1,0 +1,2830 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: payments-configuration-management-service OpenAPI Documentation
+  x-gateway-info:
+    name: payments-configuration-management-service
+
+tags:
+  - name: Interop
+    description: Endpoints related to legacy integration with middleware systems.
+      This includes operations with paygate-ng, cfd-api, and transaction-processor.
+
+paths:
+  /api/interop/configs/deposits:
+    get:
+      tags:
+        - Interop
+      parameters:
+        - in: query
+          name: authority
+          required: true
+          schema:
+            $ref: "#/components/schemas/Authority"
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "#/components/schemas/CountryIso2"
+        - in: query
+          name: platform
+          required: false
+          allowEmptyValue: true
+          schema:
+            type: string
+        - in: query
+          name: version
+          required: false
+          allowEmptyValue: true
+          schema:
+            type: string
+      summary: "Retrieve Legacy AdminAPI Contract for Deposit Payment Method Configurations"
+      description: This endpoint returns the legacy AdminAPI contract for deposit payment method configurations. It provides a list of settings and details related to deposit options.
+      operationId: "getDepositConfigs"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentsDepositConfig"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/interop/configs:
+    get:
+      tags:
+        - Interop
+      parameters:
+        - $ref: "#/components/parameters/authorityHeader"
+        - $ref: "#/components/parameters/countryHeader"
+      summary: "Retrieve Legacy AdminAPI Contract for Deposit/Payout/Refund Payment Method Configurations"
+      description: This endpoint returns the legacy AdminAPI contract for deposit/payout/refund payment method configurations. It provides a list of settings and details related to deposit options.
+      operationId: "getConfigs"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 0
+                items:
+                  $ref: "#/components/schemas/PaymentsConfig"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/interop/stp-rules:
+    get:
+      tags:
+        - Interop
+      parameters:
+        - $ref: "#/components/parameters/authorityHeader"
+        - $ref: "#/components/parameters/providerCodeHeader"
+      summary: "Retrieve Legacy AdminAPI Contract STP rules of specific Provider"
+      description: This endpoint returns a list of STP rules of specific Provider.
+      operationId: "getInteropStpProviderRules"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 0
+                items:
+                  $ref: "#/components/schemas/InteropStpProviderRule"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/countries:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Country
+      parameters:
+        - in: query
+          name: authority
+          required: false
+          schema:
+            $ref: "#/components/schemas/Authority"
+        - in: query
+          name: providerCode
+          required: false
+          schema:
+            type: string
+      summary: "Get country configs"
+      description: "Returns an array of country configs for countries from all or specified authority"
+      operationId: "getCountries"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: "Successful Request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  countries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CountryConfig"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Country
+      summary: "Add a new country"
+      description: "Add a new country to the database"
+      operationId: "addCountry"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ['iso2', 'iso3', 'name']
+              additionalProperties: false
+              properties:
+                iso2:
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  pattern: '^[A-Z]{2}$'
+                iso3:
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                  pattern: '^[A-Z]{3}$'
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                group:
+                  type: string
+                  maxLength: 30
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Country"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/currencies:
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Currency
+      summary: "Create a new currency"
+      description: "This endpoint allows you to add a new currency to the system. Upon successful addition, it returns the ISO-3 currency code of the newly added currency."
+      operationId: "addCurrency"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ['iso3']
+              properties:
+                iso3:
+                  $ref: "#/components/schemas/CurrencyIso3"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  iso3:
+                    $ref: "#/components/schemas/CurrencyIso3"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        409:
+          $ref: "#/components/responses/Conflict"
+        500:
+          $ref: "#/components/responses/ServerError"
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Currency
+      summary: "Get all available currencies"
+      description: "Returns an array of all ISO-3 currency codes"
+      operationId: "getCurrencies"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/stp-rules:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Currency
+      summary: "Get all available STP rules"
+      description: "Returns a reference dictionary list of all STP rules in the system"
+      operationId: "getStpRules"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StpRule"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/provider-methods/transaction-configs/export:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - ProviderMethods
+      summary: "Export Transaction Configurations to CSV"
+      description: |
+        This endpoint generates a CSV file containing transaction configurations for statistics by limits. The CSV file can be downloaded and contains data such as transaction details, limits, and other relevant information.
+
+        ### Response
+        The response will be a CSV file with the specified filename in the `Content-Disposition` header. The file can be downloaded by the client.
+      operationId: "exportLimits"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            text/csv:
+              schema:
+                type: string
+          headers:
+            Content-Disposition:
+              description: "Specifies the filename for the downloaded file"
+              schema:
+                type: string
+              example: 'attachment; filename="cp_export_limits_1713855949413.csv"'
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Get all available providers"
+      description: "Returns an array of all provider codes and names"
+      operationId: "getProviders"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProviderBase"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}:
+    patch:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Partially update provider by code"
+      description: "This endpoint allows you to apply partial updates to a provider by specifying its unique code. It updates the provider and returns the modified entity, reflecting only the changes provided in the request."
+      operationId: "updateProvider"
+      x-eov-operation-handler: "api/methods"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ['isEnabled']
+              additionalProperties: false
+              properties:
+                isEnabled:
+                  type: boolean
+                  example: true
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Provider"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/stp-rules:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Retrieve stp rules configuration for a particular provider"
+      operationId: "getStpProviderRules"
+      x-eov-operation-handler: "api/methods"
+      description: |
+        Retrieves the configuration of Straight-Through Processing (STP) rules for a specific provider identified by the `code` parameter. STP rules define the automated processing logic for handling transactions without manual intervention.
+      parameters:
+        - in: path
+          name: code
+          required: true
+          description: The unique identifier of the provider.
+          schema:
+            type: string
+            example: "bankwire"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StpProviderRulesDto'
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Update the STP rules configuration for a particular provider"
+      operationId: "updateStpProviderRules"
+      x-eov-operation-handler: "api/methods"
+      description: |
+        Updates the configuration of Straight-Through Processing (STP) rules for a specific provider identified by the code parameter. STP rules define the automated processing logic for handling transactions without manual intervention.
+      parameters:
+        - in: path
+          name: code
+          required: true
+          description: The unique identifier of the provider.
+          schema:
+            type: string
+            example: "bankwire"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/StpProviderRulesDto'
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StpProviderRulesDto'
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/Conflict"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/bank-accounts:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Get all bank accounts"
+      operationId: "getProviderBankAccounts"
+      x-eov-operation-handler: "api/methods"
+      description: "Returns bank accounts by provider code"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schema:
+                    type: object
+                  bankAccountsData:
+                    $ref: '#/components/schemas/BankAccountData'
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Update bank accounts"
+      operationId: "updateProviderBankAccounts"
+      x-eov-operation-handler: "api/methods"
+      description: "Update and return all bank accounts"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ 'bankAccountsData' ]
+              properties:
+                bankAccountsData:
+                  $ref: '#/components/schemas/BankAccountUpdateData'
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schema:
+                    type: object
+                  bankAccountsData:
+                    $ref: '#/components/schemas/BankAccountData'
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/CredentialsOverlapError"
+        413:
+          $ref: "#/components/responses/ContentTooLarge"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/transaction-configs/bulk-update:
+    patch:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Update transaction-configs in mapped country-authorities"
+      operationId: "bulkUpdateTransactionConfigs"
+      x-eov-operation-handler: "api/methods"
+      description: "Partial update of transaction-configs in mapped country-authorities"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+            example: "bankwire"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ 'countryAuthorityMethods', 'currencyConfigs' ]
+              additionalProperties: false
+              properties:
+                countryAuthorityMethods:
+                  type: array
+                  minItems: 1
+                  items:
+                    $ref: '#/components/schemas/CountryAuthorityMethodDto'
+                currencyConfigs:
+                  $ref: '#/components/schemas/CurrencyConfigsUpdateDto'
+      responses:
+        204:
+          $ref: "#/components/responses/NoContent"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/MaxAllowedCurrenciesExceededError"
+        422:
+          $ref: "#/components/responses/ValidationError"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/credentials:
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Update credentials"
+      operationId: "updateProviderCredentials"
+      x-eov-operation-handler: "api/methods"
+      description: "Update and return all credentials"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ 'credentialsData' ]
+              properties:
+                credentialsData:
+                  $ref: '#/components/schemas/CredentialsGroupDataUpdate'
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ 'credentialsData' ]
+                properties:
+                  schema:
+                    type: object
+                  credentialsData:
+                    $ref: '#/components/schemas/CredentialsGroupData'
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/CredentialsOverlapError"
+        413:
+          $ref: "#/components/responses/ContentTooLarge"
+        500:
+          $ref: "#/components/responses/ServerError"
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Get all credentials"
+      operationId: "getProviderCredentials"
+      x-eov-operation-handler: "api/methods"
+      description: "Returns credentials"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schema:
+                    type: object
+                  credentialsData:
+                    $ref: '#/components/schemas/CredentialsGroupData'
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/methods/filter:
+    post:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Get payment methods with state by provider"
+      description: "Returns methods with state by provider code"
+      operationId: "getProviderBoundedMethods"
+      x-eov-operation-handler: "api/methods"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                countriesAuthorities:
+                  type: array
+                  minItems: 1
+                  items:
+                    $ref: '#/components/schemas/CountryAuthorityDto'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProviderMethodBoundedDto"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/fields:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Get provider fields"
+      description: "Return fields with options for specific provider"
+      operationId: "getProviderFields"
+      x-eov-operation-handler: "api/methods"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderFields"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/fields/bulk-update:
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Upsert fields"
+      description: "Upsert Fields and FieldOptions for specific provider"
+      operationId: "upsertProviderFields"
+      x-eov-operation-handler: "api/methods"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ 'specific', 'common' ]
+              properties:
+                specific:
+                  type: array
+                  items:
+                    type: object
+                    required: [ 'parameters', 'fields' ]
+                    properties:
+                      parameters:
+                        type: object
+                        required: [ 'countriesAuthorities', 'currencies' ]
+                        properties:
+                          countriesAuthorities:
+                            type: array
+                            minItems: 1
+                            items:
+                              $ref: "#/components/schemas/CountryAuthorityDto"
+                          currencies:
+                            type: array
+                            items:
+                              type: string
+                      fields:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Field"
+                common:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Field"
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderFields"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/Conflict"
+        422:
+          $ref: "#/components/responses/Validation"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/restrictions:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Get provider platform versions"
+      operationId: "getProviderRestrictions"
+      x-eov-operation-handler: "api/methods"
+      description: "Returns provider platform versions restrictions"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderRestrictions'
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Update provider restrictions"
+      operationId: "updateProviderRestrictions"
+      x-eov-operation-handler: "api/methods"
+      description: "Update provider restrictions for mobile platforms"
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderRestrictions'
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderRestrictions'
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/CredentialsOverlapError"
+
+  /api/provider-methods/withdrawals-order:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider Method
+      summary: "Get Provider Methods sorted by order"
+      operationId: "getWithdrawalsOrder"
+      x-eov-operation-handler: "api/methods"
+      description: |
+        The endpoint returns enabled ProviderMethods for payouts and refunds in a selected authority and country in the DESC order according to the payoutOrder and refundOrder
+      parameters:
+        - in: query
+          name: authority
+          required: true
+          schema:
+            $ref: "#/components/schemas/Authority"
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "#/components/schemas/CountryIso2"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawalsOrder"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider Method
+      summary: "Update Provider Methods withdrawals order"
+      operationId: "updateWithdrawalsOrder"
+      x-eov-operation-handler: "api/methods"
+      description: |
+        The endpoint updates refunds and payout order values and enabled ProviderMethods for payouts and refunds in a selected authority and country in the DESC order after update
+      parameters:
+        - in: query
+          name: authority
+          required: true
+          schema:
+            $ref: "#/components/schemas/Authority"
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "#/components/schemas/CountryIso2"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalsOrder"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawalsOrder"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/Conflict"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+
+  /api/country-authority:
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - CountryAuthority
+      summary: "Create country authority"
+      description: "This endpoint creates a new country authority. Once created, it returns the details of the new country authority."
+      operationId: "createCountryAuthority"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CountryAuthorityDto"
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountryAuthorityDto"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/Conflict"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/country-authority-methods:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - CountryAuthorityMethod
+      parameters:
+        - in: query
+          name: authority
+          required: true
+          schema:
+            $ref: "#/components/schemas/Authority"
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "#/components/schemas/CountryIso2"
+      summary: "Get payment method configs"
+      description: "Returns an array of CountryAuthorityMethods with provider names by authority name and country ISO-2"
+      operationId: "getCountryAuthorityMethods"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  paymentMethodConfigs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PaymentMethodConfig"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/country-authority-methods/{methodCode}/status:
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - CountryAuthorityMethod
+      parameters:
+        - in: query
+          name: authority
+          required: true
+          schema:
+            $ref: "#/components/schemas/Authority"
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "#/components/schemas/CountryIso2"
+        - in: path
+          name: methodCode
+          required: true
+          schema:
+            $ref: "#/components/schemas/MethodCode"
+      summary: "Update payment method status"
+      description: "Updates payment method status value by its code for specified authority name and country ISO-2"
+      operationId: "updateCountryAuthorityMethodStatus"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateCountryAuthorityMethodStatus"
+      responses:
+        200:
+          description: 'Returns successfully updated status value'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    type: boolean
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/country-authority-methods/order:
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - CountryAuthorityMethod
+      parameters:
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "#/components/schemas/CountryIso2"
+        - in: query
+          name: authority
+          required: true
+          schema:
+            $ref: "#/components/schemas/Authority"
+      summary: "Update order of CountryAuthorityMethods"
+      description: "Update order of CountryAuthorityMethods for deposits"
+      operationId: "updateCountryAuthorityMethodsOrder"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ['methodCodes']
+              properties:
+                methodCodes:
+                  type: array
+                  items:
+                    type: string
+                    minLength: 1
+      responses:
+        200:
+          description: "Orders successfully updated"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ['methodCodes']
+                properties:
+                  methodCodes:
+                    type: array
+                    items:
+                      type: string
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/Conflict"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/country-authority-methods/{methodCode}/providers:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider Payment Method
+      parameters:
+        - in: query
+          name: authority
+          required: true
+          schema:
+            $ref: "#/components/schemas/Authority"
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "#/components/schemas/CountryIso2"
+        - in: path
+          name: methodCode
+          required: true
+          schema:
+            $ref: "#/components/schemas/MethodCode"
+      summary: "Get provider configs for payment method"
+      operationId: "getProviderMethodConfigs"
+      x-eov-operation-handler: "api/methods"
+      description: "Returns an array of provider configs for method by its code with specified authority name and country ISO-2"
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProviderConfig"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider Payment Method
+      parameters:
+        - in: path
+          name: methodCode
+          required: true
+          schema:
+            $ref: "#/components/schemas/MethodCode"
+        - in: query
+          name: authority
+          required: true
+          schema:
+            $ref: "#/components/schemas/Authority"
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "#/components/schemas/CountryIso2"
+      summary: "Update provider configs for payment method"
+      description: "Update providers method status and its transaction configs"
+      operationId: "updateProviderMethodConfigs"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateProviderMethodConfigs"
+      responses:
+        200:
+          description: 'Provider method status and transactions configs updated successfully'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProviderConfig"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        422:
+          $ref: "#/components/responses/ValidationError"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/config:
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      summary: "Upsert config"
+      description: "Create or Update Provider and map it to specific country-authority-method groups"
+      operationId: "upsertConfig"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ 'provider', 'countryAuthorityMethods' ]
+              properties:
+                provider:
+                  type: object
+                  required: [ 'name', 'code' ]
+                  additionalProperties: false
+                  properties:
+                    name:
+                      type: string
+                      minLength: 1
+                      maxLength: 100
+                      example: 'Stripe'
+                    code:
+                      type: string
+                      minLength: 1
+                      maxLength: 100
+                      pattern: ^[A-Za-z0-9_]+$
+                      example: 'stripe'
+                countryAuthorityMethods:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CountryAuthorityMethodDto'
+      responses:
+        200:
+          description: 'Entity group (Provider, CountryAuthorityMethods, ProviderMethods) was successfully created'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  provider:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: 'Stripe'
+                      code:
+                        type: string
+                        example: 'stripe'
+                  countryAuthorityMethods:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        country:
+                          $ref: '#/components/schemas/CountryIso2'
+                        authority:
+                          $ref: '#/components/schemas/Authority'
+                        methodName:
+                          type: string
+                          example: 'Visa/Mastercard'
+                        methodCode:
+                          type: string
+                          example: 'cards'
+                        isEnabled:
+                          type: boolean
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/Conflict"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/platform-versions:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Platform versions
+      summary: "Get all versions for platforms"
+      description: "Returns available application version tags for different platforms"
+      operationId: "getPlatformVersions"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: 'Successful Request'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformVersions"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/platform-versions/sync:
+    post:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Platform versions
+      summary: "Sync platform versions"
+      operationId: "syncPlatformVersions"
+      x-eov-operation-handler: "api/methods"
+      description: "Returns response with status"
+      responses:
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/providers/{code}/settings:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      summary: "Get Provider related settings"
+      description: "Get provider related settings"
+      operationId: "getProviderSettings"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: 'Success Response'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderSettings"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/ServerError"
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Provider
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      summary: "Update Provider related settings"
+      description: "Update provider related settings"
+      operationId: "updateProviderSettings"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProviderSettings"
+      responses:
+        200:
+          description: 'Success Response'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderSettings"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        409:
+          $ref: "#/components/responses/Conflict"
+        422:
+          $ref: "#/components/responses/ValidationError"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /api/methods:
+    get:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Method
+      summary: "Get Methods"
+      description: "Get Methods"
+      operationId: "getMethods"
+      x-eov-operation-handler: "api/methods"
+      responses:
+        200:
+          description: 'Success Response'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  methods:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MethodDto"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ServerError"
+    put:
+      security:
+        - authorization: [ ]
+        - apiKey: [ ]
+      tags:
+        - Method
+      summary: "Put Method"
+      description: "Create or update a Method"
+      operationId: "updateMethod"
+      x-eov-operation-handler: "api/methods"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MethodDto"
+      responses:
+        200:
+          description: 'Success Response'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MethodDto"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+components:
+  securitySchemes:
+    authorization:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  examples:
+    ERR_CREDENTIALS_OVERLAP:
+      value:
+        code: ERR_CREDENTIALS_OVERLAP
+        message: "CredentialsOverlapError"
+        requestId: "6db8a776-6dff-400d-8baf-3a6c81b45eff"
+        meta:
+          source: 0
+          conflict: ['one']
+
+    ERR_PARAMETERS_OVERLAP:
+      value:
+        code: ERR_PARAMETERS_OVERLAP
+        message: "CredentialsOverlapError"
+        requestId: "6db8a776-6dff-400d-8baf-3a6c81b45eff"
+        meta:
+          source: 0
+          target: 1
+          conflict: ['one', 'two']
+
+  parameters:
+    authorityHeader:
+      in: "query"
+      name: authority
+      required: true
+      schema:
+        $ref: "#/components/schemas/Authority"
+    countryHeader:
+      in: "query"
+      name: country
+      required: true
+      schema:
+        $ref: "#/components/schemas/CountryIso2"
+    providerCodeHeader:
+      in: "query"
+      name: provider
+      required: true
+      schema:
+        $ref: "#/components/schemas/ProviderCode"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string
+        meta:
+          type: object
+      required:
+        - code
+        - requestId
+
+    Authority:
+      type: string
+      minLength: 1
+      maxLength: 20
+      example: 'FSCM'
+
+    CurrencyIso3:
+      type: string
+      maxLength: 3
+      minLength: 3
+      pattern: '^[A-Z]+$'
+      nullable: false
+      example: 'USD'
+
+    ProviderBase:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        isEnabled:
+          type: boolean
+
+    Provider:
+      allOf:
+        - $ref: '#/components/schemas/ProviderBase'
+        - type: object
+          properties:
+            type:
+              type: string
+
+    CountryIso2:
+      type: string
+      pattern: ^[A-Za-z]{2}$
+      minLength: 2
+      maxLength: 2
+      example: "CY"
+
+    CountryIso2Nullable:
+      anyOf:
+        - $ref: '#/components/schemas/CountryIso2'
+        - type: string
+          nullable: true
+
+    ProviderCode:
+      type: string
+      minLength: 1
+      example: "stripe"
+
+    MethodCode:
+      minLength: 1
+      maxLength: 50
+      type: string
+
+    StpRule:
+      type: object
+      properties:
+        key:
+          type: string
+        description:
+          type: string
+          nullable: true
+        order:
+          type: number
+        data:
+          nullable: true
+          type: object
+          properties:
+            valueType:
+              type: string
+              enum:
+                - 'bool'
+                - 'number'
+                - 'string'
+                - 'list'
+            value:
+              anyOf:
+                - type: boolean
+                - type: number
+                - type: string
+                - type: array
+
+    CountryConfig:
+      type: object
+      properties:
+        countryGroup:
+          type: string
+        countryData:
+          type: object
+          properties:
+            countryCode:
+              type: string
+            countryName:
+              type: string
+            authorities:
+              type: array
+              items:
+                $ref: "#/components/schemas/Authority"
+
+    Country:
+      type: object
+      required: ['iso2', 'iso3', 'name']
+      properties:
+        iso2:
+          type: string
+          minLength: 2
+          maxLength: 2
+          pattern: '^[A-Z]{2}$'
+        iso3:
+          type: string
+          minLength: 3
+          maxLength: 3
+          pattern: '^[A-Z]{3}$'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+        group:
+          type: string
+          maxLength: 30
+
+    MethodDto:
+      type: object
+      required: ['code', 'name', 'description']
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[A-Za-z0-9_]{1,50}$
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: ^(?=.*[^\s]).{1,100}$
+        description:
+          type: string
+          maxLength: 65535
+
+    CountryAuthorityDto:
+      type: object
+      required: [ 'country', 'authority' ]
+      additionalProperties: false
+      properties:
+        country:
+          $ref: '#/components/schemas/CountryIso2'
+        authority:
+          $ref: '#/components/schemas/Authority'
+
+    CountryAuthorityMethodDto:
+      type: object
+      required: [ 'country', 'authority', 'method' ]
+      additionalProperties: false
+      properties:
+        country:
+          $ref: '#/components/schemas/CountryIso2'
+        authority:
+          $ref: '#/components/schemas/Authority'
+        method:
+          $ref: '#/components/schemas/MethodCode'
+
+    WithdrawalsOrder:
+      type: object
+      required: ['refunds', 'payouts']
+      additionalProperties: false
+      properties:
+        refunds:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderMethod'
+        payouts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderMethod'
+
+    ProviderMethod:
+      type: object
+      required: ['providerCode', 'methodCode']
+      additionalProperties: false
+      properties:
+        providerCode:
+          type: string
+          minLength: 1
+          maxLength: 100
+        methodCode:
+          type: string
+          minLength: 1
+          maxLength: 50
+        providerName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        methodName:
+          type: string
+          minLength: 1
+          maxLength: 100
+
+    FieldTransactionType:
+      type: string
+      enum:
+        - 'deposit'
+        - 'refund'
+        - 'payout'
+    FieldValueType:
+      type: string
+      enum:
+        - 'bool'
+        - 'string'
+        - 'select'
+
+    ProviderMethodBoundedDto:
+      type: object
+      properties:
+        methodCode:
+          type: string
+        methodName:
+          type: string
+        state:
+          enum:
+            - bounded
+            - mixed
+            - not_bounded
+
+    PaymentMethodConfig:
+      type: object
+      properties:
+        methodCode:
+          type: string
+        methodName:
+          type: string
+        isEnabled:
+          type: boolean
+        providers:
+          type: array
+          description: Provider names
+          items:
+            type: string
+
+    InteropMethodFields:
+      type: array
+      items:
+        properties:
+          key:
+            type: string
+          name:
+            type: string
+          type:
+            type: string
+          required:
+            type: boolean
+          validation:
+            type: string
+          options:
+            type: array
+            items:
+              properties:
+                key:
+                  type: string
+                  nullable: true
+                description:
+                  type: string
+                  nullable: true
+                enabled:
+                  type: boolean
+                  nullable: true
+
+    Field:
+      type: object
+      required: ['key', 'fieldType', 'transactionType', 'pattern', 'isEnabled', 'isMandatory', 'options']
+      properties:
+        key:
+          type: string
+          minLength: 1
+          maxLength: 70
+          pattern: ^[a-zA-Z0-9&()\-._ī,:\s]+$
+        name:
+          type: string
+          minLength: 0
+          maxLength: 255
+        defaultValue:
+          type: string
+          minLength: 0
+          maxLength: 255
+        fieldType:
+          $ref: "#/components/schemas/FieldValueType"
+        transactionType:
+          $ref: "#/components/schemas/FieldTransactionType"
+        pattern:
+          type: string
+          minLength: 1
+          maxLength: 700
+          nullable: false
+        isEnabled:
+          type: boolean
+        isMandatory:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: object
+            required: ['key', 'value', 'isEnabled']
+            properties:
+              key:
+                type: string
+                minLength: 1
+                maxLength: 255
+              value:
+                type: string
+                minLength: 1
+                maxLength: 255
+              isEnabled:
+                type: boolean
+
+    SpecificParameters:
+      type: object
+      properties:
+        countriesAuthorities:
+          type: array
+          items:
+            type: object
+            properties:
+              authority:
+                $ref: "#/components/schemas/Authority"
+              country:
+                $ref: "#/components/schemas/CountryIso2"
+        currencies:
+          type: array
+          items:
+            type: string
+
+
+    MinAmount:
+      type: number
+      nullable: true
+      minimum: 0
+      format: double
+
+    MaxAmount:
+      type: number
+      nullable: true
+      minimum: 0
+      format: double
+
+    Period:
+      type: integer
+      nullable: true
+      minimum: 0
+      maximum: 3650
+
+    ProviderConfig:
+      type: object
+      required: ['providerCode', 'providerName', 'isEnabled', 'currencySettings']
+      properties:
+        providerCode:
+          type: string
+        providerName:
+          type: string
+        isEnabled:
+          type: boolean
+        currencySettings:
+          $ref: '#/components/schemas/CurrencyConfigs'
+
+    CurrencyConfigsUpdateDto:
+      type: array
+      items:
+        type: object
+        required: [ currency ]
+        additionalProperties: false
+        properties:
+          currency:
+            $ref: '#/components/schemas/CurrencyIso3'
+          deposit:
+            type: object
+            additionalProperties: false
+            properties:
+              minAmount:
+                $ref: "#/components/schemas/MinAmount"
+              maxAmount:
+                $ref: "#/components/schemas/MaxAmount"
+              isEnabled:
+                type: boolean
+          payout:
+            type: object
+            additionalProperties: false
+            properties:
+              minAmount:
+                $ref: "#/components/schemas/MinAmount"
+              maxAmount:
+                $ref: "#/components/schemas/MaxAmount"
+              isEnabled:
+                type: boolean
+          refund:
+            type: object
+            additionalProperties: false
+            properties:
+              minAmount:
+                $ref: "#/components/schemas/MinAmount"
+              period:
+                $ref: "#/components/schemas/Period"
+              isEnabled:
+                type: boolean
+        minProperties: 2
+
+    CurrencyConfigs:
+      type: array
+      items:
+        type: object
+        required: [ currency, deposit ]
+        additionalProperties: false
+        properties:
+          currency:
+            $ref: '#/components/schemas/CurrencyIso3'
+          deposit:
+            type: object
+            required: [ minAmount, maxAmount, isEnabled ]
+            properties:
+              minAmount:
+                $ref: "#/components/schemas/MinAmount"
+              maxAmount:
+                $ref: "#/components/schemas/MaxAmount"
+              isEnabled:
+                type: boolean
+          payout:
+            type: object
+            required: [ minAmount, maxAmount, isEnabled ]
+            properties:
+              minAmount:
+                $ref: "#/components/schemas/MinAmount"
+              maxAmount:
+                $ref: "#/components/schemas/MaxAmount"
+              isEnabled:
+                type: boolean
+          refund:
+            type: object
+            required: [ minAmount, period, isEnabled ]
+            properties:
+              minAmount:
+                $ref: "#/components/schemas/MinAmount"
+              period:
+                $ref: "#/components/schemas/Period"
+              isEnabled:
+                type: boolean
+
+    ProviderFields:
+      type: object
+      properties:
+        common:
+          type: array
+          items:
+            $ref: "#/components/schemas/Field"
+        specific:
+          properties:
+            parameters:
+              $ref: "#/components/schemas/SpecificParameters"
+            fields:
+              $ref: "#/components/schemas/Field"
+
+    PaymentsConfig:
+        type: object
+        required:
+          - currency
+          - providers
+        properties:
+          currency:
+            type: string
+          providers:
+            type: array
+            items:
+              type: object
+              required:
+                - stpSettings
+                - key
+                - name
+                - stpAllowed
+                - stpMinDepositsCount
+                - stpMaxDepositAmount
+                - defaultLeverage
+                - transactionRejectApplicable
+                - payoutSettings
+              properties:
+                key:
+                  type: string
+                name:
+                  type: string
+                maintenance:
+                  type: boolean
+                depositSettings:
+                  type: object
+                  required:
+                    - fields
+                  properties:
+                    min:
+                      $ref: "#/components/schemas/MinAmount"
+                    max:
+                      $ref: "#/components/schemas/MaxAmount"
+                    enabled:
+                      type: boolean
+                    fields:
+                      $ref: "#/components/schemas/InteropMethodFields"
+                  additionalProperties: false
+                payoutSettings:
+                  type: object
+                  required:
+                    - fields
+                  properties:
+                    min:
+                      $ref: "#/components/schemas/MinAmount"
+                    max:
+                      $ref: "#/components/schemas/MaxAmount"
+                    enabled:
+                      type: boolean
+                    order:
+                      type: integer
+                    paymentAccountRequired:
+                      type: boolean
+                    fields:
+                      $ref: "#/components/schemas/InteropMethodFields"
+                  additionalProperties: false
+                refundSettings:
+                  type: object
+                  properties:
+                    order:
+                      type: integer
+                    enabled:
+                      type: boolean
+                    minRefundableAmountThreshold:
+                      type: integer
+                      nullable: true
+                    maxRefundablePeriodInDays:
+                      type: integer
+                      nullable: true
+                    isRequestDetailsRequired:
+                      type: boolean
+                      nullable: true
+                  additionalProperties: false
+                stpSettings:
+                  type: object
+                  deprecated: true
+                stpAllowed:
+                  type: boolean
+                  deprecated: true
+                stpMinDepositsCount:
+                  type: number
+                  deprecated: true
+                stpMaxDepositAmount:
+                  type: number
+                  deprecated: true
+                defaultLeverage:
+                  type: number
+                  deprecated: true
+                transactionRejectApplicable:
+                  type: boolean
+                  deprecated: true
+                config:
+                  type: array
+                  items:
+                    type: object
+                    required: ['key', 'value']
+                    properties:
+                      key:
+                        type: string
+                      value:
+                        type: string
+                settings:
+                  type: array
+                  deprecated: true
+                fields:
+                  type: array
+                  deprecated: true
+                withdrawalFields:
+                  type: array
+                  deprecated: true
+                accounts:
+                  type: array
+                  deprecated: true
+              additionalProperties: false
+        additionalProperties: false
+
+    PaymentsDepositConfig:
+      type: object
+      properties:
+        key:
+          type: string
+        description:
+          type: string
+        provider:
+          type: string
+        currencySettings:
+          type: array
+          items:
+            type: object
+            properties:
+              currency:
+                type: string
+              min:
+                $ref: "#/components/schemas/MinAmount"
+              max:
+                $ref: "#/components/schemas/MaxAmount"
+        convertedCurrency:
+          type: string
+          nullable: true
+        defaultCurrency:
+          type: string
+          nullable: true
+        type:
+          type: string
+        fields:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+              pattern:
+                type: string
+              options:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    key:
+                      type: string
+                    value:
+                      type: string
+
+    InteropStpProviderRule:
+      type: object
+      properties:
+        isEnabled:
+          type: boolean
+        id:
+          type: number
+        key:
+          type: string
+          example: "allowedProfileStatuses"
+        description:
+          type: string
+          example: "Profile Status should be in [<List to be provided>]"
+        allowType:
+          type: number
+          nullable: true
+        valueType:
+          type: string
+          example: "list"
+          nullable: true
+        enforceAuto:
+          type: boolean
+          nullable: true
+        value:
+          oneOf:
+            - type: array
+              items:
+                type: string
+              example: [ "verified", "verifiedLimited" ]
+            - type: string
+            - type: object # a crutch to allow `string | string[] | null` type
+              nullable: true
+        orderId:
+          type: number
+
+    SyncResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    StpProviderRulesDto:
+      type: object
+      required: ['countriesAuthorities', 'stpRules', 'isEnabled']
+      additionalProperties: false
+      properties:
+        isEnabled:
+          type: boolean
+        countriesAuthorities:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [ 'authority' ]
+            properties:
+              authority:
+                $ref: '#/components/schemas/Authority'
+        stpRules:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [ 'key', 'isEnabled' ]
+            properties:
+              key:
+                type: string
+              isEnabled:
+                type: boolean
+              type:
+                type: string
+                nullable: true
+                enum:
+                  - number
+                  - list
+              value:
+                anyOf:
+                  - type: string
+                    minLength: 1
+                    nullable: false
+                  - type: array
+                    items:
+                      type: string
+                      minLength: 1
+                      nullable: false
+                    nullable: true
+
+    ParametersGroup:
+      type: object
+      additionalProperties: false
+      properties:
+        countryAuthorities:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [ 'country', 'authority' ]
+            additionalProperties: false
+            properties:
+              country:
+                $ref: '#/components/schemas/CountryIso2'
+              authority:
+                $ref: '#/components/schemas/Authority'
+        currencies:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            nullable: false
+            minLength: 3
+            maxLength: 3
+
+    BankAccountsParametersGroup:
+      type: object
+      additionalProperties: false
+      required: [ 'countryAuthorities', 'currencies' ]
+      properties:
+        countryAuthorities:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [ 'authority', 'country' ]
+            additionalProperties: false
+            properties:
+              country:
+                $ref: '#/components/schemas/CountryIso2Nullable'
+              authority:
+                $ref: '#/components/schemas/Authority'
+        currencies:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            nullable: false
+            minLength: 3
+            maxLength: 3
+
+    CredentialsGroupData:
+      type: array
+      items:
+        type: object
+        required: [ 'parameters', 'credentialsDetails' ]
+        additionalProperties: false
+        properties:
+          parameters:
+            additionalProperties: false
+            properties:
+                countryAuthorities:
+                  items:
+                    type: object
+                  type: array
+                currencies:
+                  items:
+                    type: string
+                  type: array
+            type: object
+          credentialsDetails:
+            type: array
+            items:
+              type: object
+              additionalProperties: false
+              properties:
+                key:
+                  type: string
+                value:
+                  type: string
+
+
+    CredentialsGroupDataUpdate:
+      type: array
+      items:
+        type: object
+        required: ['parameters', 'credentialsDetails']
+        properties:
+          parameters:
+            $ref: '#/components/schemas/ParametersGroup'
+          credentialsDetails:
+            type: array
+            items:
+              type: object
+              required: ['key', 'value']
+              properties:
+                key:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                value:
+                  type: string
+                  minLength: 1
+                  maxLength: 2500
+
+    BankAccountUpdateData:
+      type: array
+      items:
+        type: object
+        required: [ 'parameters', 'bankAccounts' ]
+        properties:
+          parameters:
+            $ref: '#/components/schemas/BankAccountsParametersGroup'
+          bankAccounts:
+            type: array
+            minItems: 1
+            items:
+              $ref: '#/components/schemas/BankAccountUpdate'
+
+    BankAccountData:
+      type: array
+      items:
+        type: object
+        required: [ 'parameters', 'bankAccounts' ]
+        properties:
+          parameters:
+            $ref: '#/components/schemas/BankAccountsParametersGroup'
+          bankAccounts:
+            type: array
+            items:
+              $ref: '#/components/schemas/BankAccount'
+
+    BankAccountUpdate:
+      type: object
+      required: [ 'name', 'type', 'configs' ]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        type:
+          type: string
+          minLength: 1
+          maxLength: 50
+        configs:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [ 'key', 'value' ]
+            properties:
+              key:
+                minLength: 1
+                type: string
+              value:
+                minLength: 1
+                type: string
+
+    BankAccount:
+      type: object
+      required: [ 'name', 'type', 'configs' ]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        type:
+          type: string
+          minLength: 1
+          maxLength: 50
+        configs:
+          type: array
+          items:
+            type: object
+            required: [ 'key', 'value' ]
+            properties:
+              key:
+                minLength: 1
+                type: string
+              value:
+                minLength: 1
+                type: string
+
+
+    PlatformVersions:
+      type: object
+      properties:
+        android:
+          type: array
+          items:
+            type: string
+        ios:
+          type: array
+          items:
+            type: string
+
+    ApplicationPlatforms:
+      type: string
+      enum:
+        - web
+        - android
+        - ios
+
+    ProviderRestrictions:
+      type: array
+      items:
+        type: object
+        required: ['platform', 'isEnabled', 'countriesAuthorities', 'settings']
+        properties:
+          platform:
+            $ref: '#/components/schemas/ApplicationPlatforms'
+          isEnabled:
+            type: boolean
+          countriesAuthorities:
+            type: array
+            minItems: 1
+            items:
+              $ref: '#/components/schemas/CountryAuthorityDto'
+          settings:
+            type: array
+            items:
+              $ref: '#/components/schemas/RestrictionSetting'
+
+    RestrictionSetting:
+      type: object
+      required: ['condition', 'version']
+      properties:
+        condition:
+          type: string
+          enum:
+            - 'gte'
+            - 'lte'
+            - 'eq'
+        version:
+          type: string
+          pattern: ^\d+\.\d+\.\d+$
+
+
+    ProviderSettings:
+      type: object
+      required: [ provider, countryAuthoritySettings ]
+      properties:
+        provider:
+          type: object
+          required: [ 'type', 'convertedCurrency' ]
+          additionalProperties: false
+          properties:
+            type:
+              $ref: '#/components/schemas/ProviderType'
+            convertedCurrency:
+              type: string
+              minLength: 3
+              maxLength: 3
+              nullable: true
+        countryAuthoritySettings:
+          type: array
+          items:
+            type: object
+            required: [ country, authority, settings ]
+            properties:
+              country:
+                type: string
+              authority:
+                type: string
+              settings:
+                type: object
+                required: [ isPayoutAsRefund, isPaymentAccountRequired ]
+                properties:
+                  isPayoutAsRefund:
+                    type: boolean
+                  isPaymentAccountRequired:
+                    type: boolean
+                  defaultCurrency:
+                    type: object
+                    required: ['currency', 'isEnabled', 'methods']
+                    nullable: true
+                    properties:
+                      currency:
+                        $ref: '#/components/schemas/CurrencyIso3'
+                      isEnabled:
+                        type: boolean
+                        nullable: false
+                      methods:
+                        type: array
+                        minItems: 1
+                        items:
+                          type: string
+                          nullable: false
+
+    ProviderType:
+      type: string
+      enum:
+        - default
+        - crypto
+        - bankwire
+
+
+  requestBodies:
+    UpdateCountryAuthorityMethodStatus:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: ['isEnabled']
+            additionalProperties: false
+            properties:
+              isEnabled:
+                type: boolean
+
+    UpdateProviderMethodConfigs:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              required: ['providerCode', 'isEnabled', 'currencySettings']
+              additionalProperties: false
+              properties:
+                providerCode:
+                  type: string
+                isEnabled:
+                  type: boolean
+                currencySettings:
+                  type: array
+                  items:
+                    type: object
+                    required: ['currency', 'deposit']
+                    additionalProperties: false
+                    properties:
+                      currency:
+                        $ref: '#/components/schemas/CurrencyIso3'
+                      deposit:
+                        type: object
+                        required: ['minAmount', 'maxAmount', 'isEnabled']
+                        additionalProperties: false
+                        properties:
+                          minAmount:
+                            $ref: "#/components/schemas/MinAmount"
+                          maxAmount:
+                            $ref: "#/components/schemas/MaxAmount"
+                          isEnabled:
+                            type: boolean
+                      payout:
+                        type: object
+                        required: ['minAmount', 'maxAmount', 'isEnabled']
+                        additionalProperties: false
+                        properties:
+                          minAmount:
+                            $ref: "#/components/schemas/MinAmount"
+                          maxAmount:
+                            $ref: "#/components/schemas/MaxAmount"
+                          isEnabled:
+                            type: boolean
+                      refund:
+                        type: object
+                        required: ['minAmount', 'period', 'isEnabled']
+                        additionalProperties: false
+                        properties:
+                          minAmount:
+                            $ref: "#/components/schemas/MinAmount"
+                          period:
+                            $ref: "#/components/schemas/Period"
+                          isEnabled:
+                            type: boolean
+
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    MaxAllowedCurrenciesExceededError:
+      description: Exceeded maximum allowed currencies
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    CredentialsOverlapError:
+      description: 'CredentialsOverlapError'
+      content:
+        application/json:
+          examples:
+            ERR_CREDENTIALS_OVERLAP:
+              $ref: '#/components/examples/ERR_CREDENTIALS_OVERLAP'
+            ERR_PARAMETERS_OVERLAP:
+              $ref: '#/components/examples/ERR_PARAMETERS_OVERLAP'
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    NoContent:
+      description: No Content
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    Validation:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    ContentTooLarge:
+      description: Content to large
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    ServerError:
+      description: Server error.

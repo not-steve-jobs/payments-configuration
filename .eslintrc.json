@@ -1,0 +1,12 @@
+{
+  "ignorePatterns": ["src/db/migrations", "src/db/sql-utils", "src/db/seeds"],
+  "root": true,
+  "parserOptions": {
+    "project": "tsconfig.eslint.json"
+  },
+  "extends": ["@internal/eslint-config-mw-development"],
+  "rules": {
+    "indent": "off",
+    "jest/expect-expect": "off"
+  }
+}

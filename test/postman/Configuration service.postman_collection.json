@@ -1,0 +1,5157 @@
+{
+	"info": {
+		"_postman_id": "6b609c6f-20a3-43a4-9819-6660b4dab42f",
+		"name": "Configuration service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28714716",
+		"_collection_link": "https://fxpro-configuration.postman.co/workspace/FxPro~0884b134-8074-4f96-99b7-e64d6d192dfb/collection/28714716-6b609c6f-20a3-43a4-9819-6660b4dab42f?action=share&creator=28714716&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Preconditions",
+			"item": [
+				{
+					"name": "Generate JWT",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"bearerTokenConfig\", \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiI4NGY5ZjZkMS0wNzViLTQ3NjUtYTQ0OC1lOGIwNWY2YjM3YzQiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vMTJiNTdjYjctODgyZS00MDQzLWE5MDItNmQ4ODU2NTQzN2I0L3YyLjAiLCJpYXQiOjE2ODk5MzgyNjEsIm5iZiI6MTY4OTkzODI2MSwiZXhwIjoxNjkyNTMwNTYxODgwLCJlbWFpbCI6ImkucGV0cm92QGZ4cHJvLmNvbSIsIm5hbWUiOiJQZXRyb3YsIEl2YW4iLCJvaWQiOiJiYzgxNDQ4Zi0wYmI5LTRjZDktOGY1ZC0xNDRiYmI5Y2ZjZjIiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJpLnBldHJvdkBmeHByby5jb20iLCJyaCI6IjAuQVZ3QXQzeTFFaTZJUTBDcEFtMklWbFEzdE5IMi1ZUmJCMlZIcEVqb3NGOXJOOFJjQUlvLiIsInN1YiI6IjFlM2pScVZhMDZWTzZpOEZia3Jzd0cwOGJhQUFnSUREeFVnSGdvZmVraEEiLCJ0aWQiOiIxMmI1N2NiNy04ODJlLTQwNDMtYTkwMi02ZDg4NTY1NDM3YjQiLCJ1dGkiOiJvNDZqTEVkc3hVZUlXMUFVNmhyb0FBIiwidmVyIjoiMi4wIn0=.QlCCDjM99ak01KMq64qybrz92glbtFPz_gsWp0C5KXU=\")\r",
+									"pm.globals.set(\"mock\", \"mock4\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://admin-auth-service.mock2.qa.direct.k8s.local/login?returnJwtInJsonResponse=true",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"mock2",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"login"
+							],
+							"query": [
+								{
+									"key": "returnJwtInJsonResponse",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "[CP-5] Countries and autrorities",
+			"item": [
+				{
+					"name": "Countries in payment configs by authority - positive - FSCM",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"countries\" : {\"type\" : \"array\"},\r",
+									"            \"countryGroup\" : {\"type\" : \"string\"},\r",
+									"            \"countryData\" : {\"type\" : \"object\"},\r",
+									"                \"authorities\" : {\"type\" : \"array\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"countries\");\r",
+									"        pm.expect(jsonData.countries[0]).to.haveOwnProperty(\"countryData\");\r",
+									"        pm.expect(jsonData.countries[0].countryData).to.haveOwnProperty(\"authorities\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"More than 0 countries\", () => {\r",
+									"        pm.expect(jsonData.countries.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"    pm.test(\"More than 0 authorities\", () => {\r",
+									"        pm.expect(jsonData.countries[0].countryData.authorities.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    pm.test(\"Each country includes FSCM\", () => {\r",
+									"        _.each(jsonData.countries, (item) => {\r",
+									"        pm.expect(item.countryData.authorities).to.include('FSCM')\r",
+									"        })\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/countries?authority=FSCM",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"countries"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "FSCM"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Countries in payment configs by authority - positive - GM",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"countries\" : {\"type\" : \"array\"},\r",
+									"            \"countryGroup\" : {\"type\" : \"string\"},\r",
+									"            \"countryData\" : {\"type\" : \"object\"},\r",
+									"                \"authorities\" : {\"type\" : \"array\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"countries\");\r",
+									"        pm.expect(jsonData.countries[0]).to.haveOwnProperty(\"countryData\");\r",
+									"        pm.expect(jsonData.countries[0].countryData).to.haveOwnProperty(\"authorities\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"More than 0 countries\", () => {\r",
+									"        pm.expect(jsonData.countries.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"    pm.test(\"More than 0 authorities\", () => {\r",
+									"        pm.expect(jsonData.countries[0].countryData.authorities.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"    \r",
+									"    pm.test(\"Each country includes GM\", () => {\r",
+									"        _.each(jsonData.countries, (item) => {\r",
+									"        pm.expect(item.countryData.authorities).to.include('GM')\r",
+									"        })\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/countries?authority=GM",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"countries"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "GM"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Countries in payment configs by authority - positive - GM - small letters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"countries\" : {\"type\" : \"array\"},\r",
+									"            \"countryGroup\" : {\"type\" : \"string\"},\r",
+									"            \"countryData\" : {\"type\" : \"object\"},\r",
+									"                \"authorities\" : {\"type\" : \"array\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"countries\");\r",
+									"        pm.expect(jsonData.countries[0]).to.haveOwnProperty(\"countryData\");\r",
+									"        pm.expect(jsonData.countries[0].countryData).to.haveOwnProperty(\"authorities\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"More than 0 countries\", () => {\r",
+									"        pm.expect(jsonData.countries.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"    pm.test(\"More than 0 authorities\", () => {\r",
+									"        pm.expect(jsonData.countries[0].countryData.authorities.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"    \r",
+									"    pm.test(\"Each country includes GM\", () => {\r",
+									"        _.each(jsonData.countries, (item) => {\r",
+									"        pm.expect(item.countryData.authorities).to.include('GM')\r",
+									"        })\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/countries?authority=gm",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"countries"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "gm"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Countries in payment configs by authority - positive - CYSEC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"countries\" : {\"type\" : \"array\"},\r",
+									"            \"countryGroup\" : {\"type\" : \"string\"},\r",
+									"            \"countryData\" : {\"type\" : \"object\"},\r",
+									"                \"authorities\" : {\"type\" : \"array\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"countries\");\r",
+									"        pm.expect(jsonData.countries[0]).to.haveOwnProperty(\"countryData\");\r",
+									"        pm.expect(jsonData.countries[0].countryData).to.haveOwnProperty(\"authorities\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"More than 0 countries\", () => {\r",
+									"        pm.expect(jsonData.countries.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"    pm.test(\"More than 0 authorities\", () => {\r",
+									"        pm.expect(jsonData.countries[0].countryData.authorities.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    pm.test(\"Each country includes CYSEC\", () => {\r",
+									"        _.each(jsonData.countries, (item) => {\r",
+									"        pm.expect(item.countryData.authorities).to.include('CYSEC')\r",
+									"        })\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/countries?authority=CYSEC",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"countries"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Countries in payment configs by authority - negative - MENA - autrority is not set up",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"countries\" : {\"type\" : \"array\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"countries\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Value tests\", () => {\r",
+									"        pm.expect(jsonData.countries.length).to.be.eql(0);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/countries?authority=MENA",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"countries"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "MENA"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Countries in payment configs by authority - negative - not existing authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.match(/\\[\\{\\\"message\\\":\\\"must be equal to one of the allowed values: .*\\\",\\\"path\\\":\\\"\\/query\\/authority\\\",\\\"value\\\":null\\}\\]/);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/countries?authority=WRONG",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"countries"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "WRONG"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Countries in payment configs by authority - negative - no authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"countries\" : {\"type\" : \"array\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"countries\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/countries",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"countries"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "[CP-23] Payment methods",
+			"item": [
+				{
+					"name": "Payment  methods by authority and country - positive - GM/AR",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"paymentMethodConfigs\" : {\"type\" : \"array\"},\r",
+									"            \"methodKey\" : {\"type\" : \"string\"},\r",
+									"            \"methodName\" : {\"type\" : \"string\"},\r",
+									"            \"isEnabled\" : {\"type\" : \"boolean\"},\r",
+									"            \"providerList\" : {\"type\" : \"array\"}\r",
+									"            \r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"paymentMethodConfigs\");\r",
+									"        pm.expect(jsonData.paymentMethodConfigs[0]).to.haveOwnProperty(\"isEnabled\");\r",
+									"        pm.expect(jsonData.paymentMethodConfigs[0]).to.haveOwnProperty(\"providerList\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"More than 0 methods\", () => {\r",
+									"        pm.expect(jsonData.paymentMethodConfigs.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?authority=GM&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "GM"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - positive - CYSEC/AR",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"paymentMethodConfigs\" : {\"type\" : \"array\"},\r",
+									"            \"methodKey\" : {\"type\" : \"string\"},\r",
+									"            \"methodName\" : {\"type\" : \"string\"},\r",
+									"            \"isEnabled\" : {\"type\" : \"boolean\"},\r",
+									"            \"providerList\" : {\"type\" : \"array\"}\r",
+									"            \r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"paymentMethodConfigs\");\r",
+									"        pm.expect(jsonData.paymentMethodConfigs[0]).to.haveOwnProperty(\"isEnabled\");\r",
+									"        pm.expect(jsonData.paymentMethodConfigs[0]).to.haveOwnProperty(\"providerList\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"More than 0 methods\", () => {\r",
+									"        pm.expect(jsonData.paymentMethodConfigs.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - negative - WRONG authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.match(/\\[\\{\\\"message\\\":\\\"must be equal to one of the allowed values: .*\\\",\\\"path\\\":\\\"\\/query\\/authority\\\",\\\"value\\\":null\\}\\]/);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?authority=WRONG&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "WRONG"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - negative - WRONG country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"id\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(404);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"id\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Country\\'s authority not found');\r",
+									"        pm.expect(jsonData.meta.id).to.be.eql('WW:GM');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?authority=GM&country=WW",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "GM"
+								},
+								{
+									"key": "country",
+									"value": "WW"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - negative - AR/MENA valid but not found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"id\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(404);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"id\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Country\\'s authority not found');\r",
+									"        pm.expect(jsonData.meta.id).to.be.eql('AR:MENA');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?authority=MENA&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "MENA"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - negative - 3 chars in country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.match(/[{\\\"message\\\":\\\"must NOT have more than 2 characters\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]/);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?authority=GM&country=WWW",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "GM"
+								},
+								{
+									"key": "country",
+									"value": "WWW"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - small letters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"paymentMethodConfigs\" : {\"type\" : \"array\"},\r",
+									"            \"methodKey\" : {\"type\" : \"string\"},\r",
+									"            \"methodName\" : {\"type\" : \"string\"},\r",
+									"            \"isEnabled\" : {\"type\" : \"boolean\"},\r",
+									"            \"providerList\" : {\"type\" : \"array\"}\r",
+									"            \r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"paymentMethodConfigs\");\r",
+									"        pm.expect(jsonData.paymentMethodConfigs[0]).to.haveOwnProperty(\"isEnabled\");\r",
+									"        pm.expect(jsonData.paymentMethodConfigs[0]).to.haveOwnProperty(\"providerList\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"More than 0 methods\", () => {\r",
+									"        pm.expect(jsonData.paymentMethodConfigs.length > 0).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?authority=gm&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "gm"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - negative - no country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?authority=GM",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "GM"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - negative - no authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods?country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							],
+							"query": [
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods by authority and country - negative - no params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null},{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "[CP-34] Payment methods switching",
+			"item": [
+				{
+					"name": "Payment  methods disabling - CYSEC/AR/BTC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(204);\r",
+									"    });\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"isEnabled\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/btc/status?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"btc",
+								"status"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods disabling - CYSEC/AR/BTC - small letters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(204);\r",
+									"    });\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"isEnabled\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/btc/status?authority=cysec&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"btc",
+								"status"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "cysec"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods enabling - CYSEC/AR/BTC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(204);\r",
+									"    });\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"isEnabled\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/btc/status?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"btc",
+								"status"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods enabling - wrong method",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"id\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(404);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"id\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Payment Method not found');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"isEnabled\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/WRONG/status?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"WRONG",
+								"status"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods enabling - not used authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"id\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(404);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"id\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Country\\'s authority not found');\r",
+									"        pm.expect(jsonData.meta.id).to.be.eql('AR:MENA');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"isEnabled\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/btc/status?authority=MENA&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"btc",
+								"status"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "MENA"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods enabling - no country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"isEnabled\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/btc/status?authority=MENA",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"btc",
+								"status"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "MENA"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods enabling - no authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"isEnabled\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/btc/status?country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"btc",
+								"status"
+							],
+							"query": [
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment  methods enabling - no params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null},{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"isEnabled\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/btc/status",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"btc",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "[CP-42] Deposit reading",
+			"item": [
+				{
+					"name": "Payment method - deposit - CYSEC/AR",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"array\",\r",
+									"    \"properties\" : {\r",
+									"        \"key\" : {\"type\" : \"string\"},\r",
+									"        \"provider\" : {\"type\" : \"string\"},\r",
+									"        \"description\" : {\"type\" : \"string\"},\r",
+									"        \"currencySettings\" : {\"type\" : \"array\"},\r",
+									"            \"currency\" : {\"type\" : \"string\"}\r",
+									"            \r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData[0]).to.haveOwnProperty(\"provider\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"currency\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"min\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"max\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/configurator/paymentMethods/deposits?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"configurator",
+								"paymentMethods",
+								"deposits"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment method - deposit - CYSEC/AR - small letters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"array\",\r",
+									"    \"properties\" : {\r",
+									"        \"key\" : {\"type\" : \"string\"},\r",
+									"        \"provider\" : {\"type\" : \"string\"},\r",
+									"        \"description\" : {\"type\" : \"string\"},\r",
+									"        \"currencySettings\" : {\"type\" : \"array\"},\r",
+									"            \"currency\" : {\"type\" : \"string\"}\r",
+									"            \r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData[0]).to.haveOwnProperty(\"provider\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"currency\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"min\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"max\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/configurator/paymentMethods/deposits?authority=cysec&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"configurator",
+								"paymentMethods",
+								"deposits"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "cysec"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment method - deposit - wrong country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/configurator/paymentMethods/deposits?authority=CYSEC&country=WW",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"configurator",
+								"paymentMethods",
+								"deposits"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "WW"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment method - deposit - wrong authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.match(/\\[\\{\\\"message\\\":\\\"must be equal to one of the allowed values: .*\\\",\\\"path\\\":\\\"\\/query\\/authority\\\",\\\"value\\\":null\\}\\]/);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/configurator/paymentMethods/deposits?authority=WRONG&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"configurator",
+								"paymentMethods",
+								"deposits"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "WRONG"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment method - deposit - no country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/configurator/paymentMethods/deposits?authority=cysec",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"configurator",
+								"paymentMethods",
+								"deposits"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "cysec"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment method - deposit - no authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/configurator/paymentMethods/deposits?country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"configurator",
+								"paymentMethods",
+								"deposits"
+							],
+							"query": [
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment method - deposit - no params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null},{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/configurator/paymentMethods/deposits",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"configurator",
+								"paymentMethods",
+								"deposits"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "[CP-43] Provider config reading",
+			"item": [
+				{
+					"name": "Provider config reading - CYSEC/AR - cards - Stripe, Ingenico",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"array\",\r",
+									"    \"properties\" : {\r",
+									"        \"providerCode\" : {\"type\" : \"string\"},\r",
+									"        \"providerName\" : {\"type\" : \"string\"},\r",
+									"        \"isEnabled\" : {\"type\" : \"boolean\"},\r",
+									"        \"currencySettings\" : {\"type\" : \"array\"},\r",
+									"            \"currency\" : {\"type\" : \"string\"}\r",
+									"            \r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData[0]).to.haveOwnProperty(\"providerCode\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"currency\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"deposit\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"payout\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"refund\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"First enabled\", () => {\r",
+									"        pm.expect(jsonData[0].isEnabled).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config reading - CYSEC/AR - cards - Stripe, Ingenico - small letters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"array\",\r",
+									"    \"properties\" : {\r",
+									"        \"providerCode\" : {\"type\" : \"string\"},\r",
+									"        \"providerName\" : {\"type\" : \"string\"},\r",
+									"        \"isEnabled\" : {\"type\" : \"boolean\"},\r",
+									"        \"currencySettings\" : {\"type\" : \"array\"},\r",
+									"            \"currency\" : {\"type\" : \"string\"}\r",
+									"            \r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData[0]).to.haveOwnProperty(\"providerCode\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"currency\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"deposit\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"payout\");\r",
+									"        pm.expect(jsonData[0].currencySettings[0]).to.haveOwnProperty(\"refund\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"First enabled\", () => {\r",
+									"        pm.expect(jsonData[0].isEnabled).to.be.true;\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=cysec&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "cysec"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config reading - WRONG authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.match(/\\[\\{\\\"message\\\":\\\"must be equal to one of the allowed values: .*\\\",\\\"path\\\":\\\"\\/query\\/authority\\\",\\\"value\\\":null\\}\\]/);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=WRONG&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "WRONG"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config reading - WRONG country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=GM&country=WW",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "GM"
+								},
+								{
+									"key": "country",
+									"value": "WW"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config reading - no country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=GM",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "GM"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config reading - no authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config reading - no params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null},{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "[CP-44] Provider config editing",
+			"item": [
+				{
+					"name": "Provider config editing - CYSEC/AR - cards - Stripe, Ingenico - numbers and nulls",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(204);\r",
+									"    });\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": null,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": null,\r\n          \"period\": null,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": null,\r\n          \"period\": null,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config editing - CYSEC/AR - cards - Stripe, Ingenico - numbers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(204);\r",
+									"    });\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 1,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config editing - CYSEC/AR - cards - Stripe, Ingenico - small letters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(204);\r",
+									"    });\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 1,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=cysec&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "cysec"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config editing - wrong authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.match(/\\[\\{\\\"message\\\":\\\"must be equal to one of the allowed values: .*\\\",\\\"path\\\":\\\"\\/query\\/authority\\\",\\\"value\\\":null\\}\\]/);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 1,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=WRONG&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "WRONG"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config editing - wrong country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"id\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(404);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"id\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Country\\'s authority not found');\r",
+									"        pm.expect(jsonData.meta.id).to.be.eql('WW:CYSEC');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 1,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=CYSEC&country=WW",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "WW"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config editing - wrong payment method",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"id\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(404);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"id\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Payment Method not found');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 1,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/WRONG/providersConfigs?authority=CYSEC&country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"WRONG",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								},
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config editing - no country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 1,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?authority=CYSEC",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "authority",
+									"value": "CYSEC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config editing - no authority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 1,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs?country=AR",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							],
+							"query": [
+								{
+									"key": "country",
+									"value": "AR"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider config editing - no params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\" : {\r",
+									"        \"message\" : {\"type\" : \"string\"},\r",
+									"        \"code\" : {\"type\" : \"string\"},\r",
+									"        \"meta\" : {\"type\" : \"object\"},\r",
+									"            \"details\" : {\"type\" : \"string\"},\r",
+									"        \"requestId\" : {\"type\" : \"string\"}\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 400 && responseCode.code <= 499) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(400);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Field tests\r",
+									"    pm.test(\"Field tests\", () => {\r",
+									"        pm.expect(jsonData).to.haveOwnProperty(\"message\");\r",
+									"        pm.expect(jsonData.meta).to.haveOwnProperty(\"details\");\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"    //Value tests\r",
+									"    pm.test(\"Error message test\", () => {\r",
+									"        pm.expect(jsonData.message).to.be.eql('Bad Request');\r",
+									"        pm.expect(jsonData.meta.details).to.be.eql('[{\\\"message\\\":\\\"must have required property \\'authority\\'\\\",\\\"path\\\":\\\"/query/authority\\\",\\\"value\\\":null},{\\\"message\\\":\\\"must have required property \\'country\\'\\\",\\\"path\\\":\\\"/query/country\\\",\\\"value\\\":null}]');\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"providerCode\": \"stripe\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 100000,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 0,\r\n          \"period\": 90,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"providerCode\": \"ingenico\",\r\n    \"isEnabled\": true,\r\n    \"currencySettings\": [\r\n      {\r\n        \"currency\": \"USD\",\r\n        \"deposit\": {\r\n          \"minAmount\": 10,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 0,\r\n          \"maxAmount\": 1,\r\n          \"isEnabled\": false\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      },\r\n      {\r\n        \"currency\": \"EUR\",\r\n        \"deposit\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"payout\": {\r\n          \"minAmount\": 100,\r\n          \"maxAmount\": 5000,\r\n          \"isEnabled\": true\r\n        },\r\n        \"refund\": {\r\n          \"minAmount\": 1,\r\n          \"period\": 1,\r\n          \"isEnabled\": false\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/methods/cards/providersConfigs",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"methods",
+								"cards",
+								"providersConfigs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "[CP-51] Get currencies",
+			"item": [
+				{
+					"name": "Provider currencies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"    \"type\": \"array\"\r",
+									"}\r",
+									"\r",
+									"if (responseCode.code >= 200 && responseCode.code <= 299) {\r",
+									"    var jsonData = JSON.parse(responseBody);\r",
+									"    \r",
+									"    //Generic tests\r",
+									"    pm.test(\"Generic tests\", function() {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"    \r",
+									"    //Schema validation\r",
+									"    pm.test(\"Validate schema\", () => {\r",
+									"        pm.response.to.have.jsonSchema(schema);\r",
+									"        }\r",
+									"    );\r",
+									"\r",
+									"} else {\r",
+									"      \r",
+									"      tests[\"Response status and body: \" + responseCode.code + \" ===> \"+responseBody] = true === false;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{bearerTokenConfig}}",
+								"type": "text"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://admin-auth-service.{{mock}}.qa.direct.k8s.local/api/paymentConfigs/currencies",
+							"protocol": "http",
+							"host": [
+								"admin-auth-service",
+								"{{mock}}",
+								"qa",
+								"direct",
+								"k8s",
+								"local"
+							],
+							"path": [
+								"api",
+								"paymentConfigs",
+								"currencies"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

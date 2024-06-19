@@ -1,0 +1,6 @@
+include:
+  - project: "middleware/pipelines"
+    file: "/node/service.docker-node16-kaniko.gitlab-ci.yml"
+variables:
+  NEEDS_TEST_DB: "true"
+  NEEDS_TEST_REDIS: "true"
